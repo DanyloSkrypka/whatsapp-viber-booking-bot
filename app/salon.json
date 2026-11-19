@@ -1,0 +1,29 @@
+{
+  "name": "Studio Nord",
+  "slot_step_min": 30,
+  "booking_horizon_days": 14,
+  "min_lead_min": 60,
+  "services": [
+    {"id": "cut_m", "duration": 30, "price": "25 €",
+     "name": {"de": "Herrenhaarschnitt", "en": "Men's haircut", "ru": "Мужская стрижка"}},
+    {"id": "beard", "duration": 30, "price": "15 €",
+     "name": {"de": "Bart trimmen", "en": "Beard trim", "ru": "Стрижка бороды"}},
+    {"id": "cut_w", "duration": 60, "price": "45 €",
+     "name": {"de": "Damenhaarschnitt", "en": "Women's haircut", "ru": "Женская стрижка"}},
+    {"id": "color", "duration": 90, "price": "70 €",
+     "name": {"de": "Färben", "en": "Hair colouring", "ru": "Окрашивание"}},
+    {"id": "nails", "duration": 60, "price": "35 €",
+     "name": {"de": "Maniküre", "en": "Manicure", "ru": "Маникюр"}}
+  ],
+  "masters": [
+    {"id": "alex", "name": "Alex", "services": ["cut_m", "beard"],
+     "hours": {"mon": ["10:00", "18:00"], "tue": ["10:00", "18:00"], "wed": ["10:00", "18:00"],
+               "thu": ["12:00", "20:00"], "fri": ["10:00", "18:00"], "sat": ["10:00", "14:00"]}},
+    {"id": "mia", "name": "Mia", "services": ["cut_w", "color", "cut_m"],
+     "hours": {"tue": ["09:00", "17:00"], "wed": ["09:00", "17:00"], "thu": ["09:00", "17:00"],
+               "fri": ["09:00", "17:00"], "sat": ["09:00", "15:00"]}},
+    {"id": "olga", "name": "Olga", "services": ["nails"],
+     "hours": {"mon": ["10:00", "19:00"], "wed": ["10:00", "19:00"], "fri": ["10:00", "19:00"],
+               "sat": ["10:00", "16:00"]}}
+  ]
+}

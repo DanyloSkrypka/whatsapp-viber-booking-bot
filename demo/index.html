@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Booking Bot Emulator</title>
+<style>
+  :root {
+    --wa-green: #008069; --wa-accent: #00a884; --wa-teal-text: #027eb5;
+    --wa-bg: #efeae2; --wa-out: #d9fdd3; --wa-in: #ffffff; --wa-meta: #667781;
+    --wa-text: #111b21; --bar: #f0f2f5;
+    --page: #0f1419; --panel: #161d24; --line: #26313b; --muted: #8b98a5; --ink: #e9eef2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: radial-gradient(1200px 700px at 30% 20%, #17322c 0%, var(--page) 60%);
+         color: var(--ink); font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         display: flex; align-items: center; justify-content: center; gap: 40px; padding: 24px; overflow: hidden; }
+
+  /* ---------- side panel ---------- */
+  .side { width: 360px; display: flex; flex-direction: column; gap: 18px; }
+  .brand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--wa-accent); font-weight: 700; }
+  h1 { margin: 0; font-size: 34px; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; }
+  .sub { color: var(--muted); font-size: 15px; line-height: 1.45; margin: 0; }
+  .steps { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .steps li { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 12px;
+              color: var(--muted); font-size: 15px; transition: all .35s ease; border: 1px solid transparent; }
+  .steps li b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px;
+                background: #22303a; color: var(--muted); flex: none; transition: all .35s ease; }
+  .steps li.done { color: #cfe9e2; }
+  .steps li.done b { background: #1f4d43; color: #9ff0d9; }
+  .steps li.on { color: #fff; background: rgba(0,168,132,.14); border-color: rgba(0,168,132,.45); }
+  .steps li.on b { background: var(--wa-accent); color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); color: #b9c6d0; background: var(--panel); }
+  .clock { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line);
+           border-radius: 14px; padding: 10px 12px; }
+  .clock .t { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 16px; flex: 1; }
+  .clock .lbl { color: var(--muted); font-size: 12px; display: block; font-weight: 500; }
+  .clock button { background: #22303a; color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+                  padding: 8px 10px; font-size: 13px; cursor: pointer; }
+  .clock button:hover { background: #2a3a46; }
+
+  /* ---------- phone ---------- */
+  .phone { width: 390px; height: 800px; border-radius: 48px; background: #0b0b0c; padding: 12px;
+           box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 0 0 2px #2b2b2e; position: relative; flex: none; }
+  .phone.small { transform: scale(.86); transform-origin: center; margin: 0 -28px; }
+  .screen { width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--wa-bg);
+            display: flex; flex-direction: column; position: relative; color: var(--wa-text); }
+  .status { height: 38px; background: var(--wa-green); color: #fff; font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 28px 0; }
+  .notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 110px; height: 30px;
+           background: #0b0b0c; border-radius: 20px; z-index: 5; }
+  .head { background: var(--wa-green); color: #fff; display: flex; align-items: center; gap: 10px; padding: 8px 12px 10px; }
+  .head .back { font-size: 22px; opacity: .9; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+            font-size: 15px; background: #e7fff8; color: var(--wa-green); flex: none; }
+  .head .who { flex: 1; min-width: 0; }
+  .head .name { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+  .verified { width: 15px; height: 15px; border-radius: 50%; background: #25d366; display: inline-grid; place-items: center;
+              font-size: 10px; color: #fff; }
+  .head .st { font-size: 12.5px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .head .icons { display: flex; gap: 18px; font-size: 18px; opacity: .95; }
+
+  .chat { flex: 1; overflow-y: auto; padding: 10px 10px 6px; scroll-behavior: smooth;
+          background-color: var(--wa-bg);
+          background-image: radial-gradient(rgba(0,0,0,.035) 1px, transparent 1.2px), radial-gradient(rgba(0,0,0,.025) 1px, transparent 1.2px);
+          background-size: 22px 22px, 22px 22px; background-position: 0 0, 11px 11px; }
+  .chat::-webkit-scrollbar { width: 0; }
+  .day { align-self: center; margin: 4px auto 10px; background: #fff; color: var(--wa-meta); font-size: 12px;
+         padding: 5px 10px; border-radius: 8px; width: max-content; box-shadow: 0 1px .5px rgba(11,20,26,.13); }
+  .sys { margin: 0 auto 10px; background: #fff5c4; color: #54656f; font-size: 12px; padding: 6px 10px; border-radius: 8px;
+         max-width: 88%; text-align: center; box-shadow: 0 1px .5px rgba(11,20,26,.13); }
+  .row { display: flex; margin: 2px 0; }
+  .row.out { justify-content: flex-end; }
+  .msg { max-width: 82%; animation: pop .22s ease-out; }
+  @keyframes pop { from { transform: translateY(6px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  .bubble { background: var(--wa-in); border-radius: 8px; padding: 6px 8px 6px 9px; font-size: 14.6px; line-height: 1.36;
+            box-shadow: 0 1px .5px rgba(11,20,26,.13); white-space: pre-wrap; word-wrap: break-word; position: relative; }
+  .in .bubble.first { border-top-left-radius: 0; }
+  .out .bubble { background: var(--wa-out); }
+  .out .bubble.first { border-top-right-radius: 0; }
+  .meta { float: right; margin: 6px 0 -4px 10px; font-size: 11px; color: var(--wa-meta); display: inline-flex; gap: 3px; align-items: center; }
+  .ticks { color: #53bdeb; font-size: 12px; letter-spacing: -3px; margin-right: 2px; }
+  .tpl { display: inline-block; font-size: 10.5px; color: #8696a0; border: 1px solid #d1d7db; border-radius: 4px;
+         padding: 0 4px; margin-bottom: 3px; }
+  .btns { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  .btn { background: var(--wa-in); border: 0; border-radius: 8px; color: var(--wa-teal-text); font-size: 14.5px; font-weight: 500;
+         padding: 9px 8px; cursor: pointer; box-shadow: 0 1px .5px rgba(11,20,26,.13); font-family: inherit; }
+  .btn:hover { background: #f5f6f6; }
+  .btn.pressed { background: #e9edef; }
+  .listbtn { border-top: 1px solid #e9edef; margin: 8px -8px -6px -9px; padding: 9px; text-align: center; color: var(--wa-teal-text);
+             font-weight: 500; font-size: 14.5px; cursor: pointer; border-radius: 0 0 8px 8px; }
+  .listbtn:hover { background: #f5f6f6; }
+  .bubble.list { padding-bottom: 6px; }
+  .typing { display: inline-flex; gap: 3px; padding: 4px 2px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: #9aa6ad; animation: blink 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%,80%,100% { opacity: .3; } 40% { opacity: 1; } }
+
+  .bar { background: var(--bar); display: flex; align-items: center; gap: 8px; padding: 8px 8px 22px; }
+  .input { flex: 1; background: #fff; border-radius: 22px; display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 42px; }
+  .input span { color: #8696a0; font-size: 20px; }
+  .input input { border: 0; outline: 0; flex: 1; font-size: 15px; background: transparent; font-family: inherit; color: var(--wa-text); }
+  .send { width: 44px; height: 44px; border-radius: 50%; background: var(--wa-accent); border: 0; color: #fff; display: grid;
+          place-items: center; cursor: pointer; flex: none; }
+  .send svg { width: 20px; height: 20px; }
+
+  /* list sheet */
+  .sheet-bg { position: absolute; inset: 0; background: rgba(11,20,26,.4); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 18px 18px 0 0; z-index: 11;
+           transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1); max-height: 78%; display: flex; flex-direction: column; }
+  .screen.sheet-open .sheet-bg { opacity: 1; pointer-events: auto; }
+  .screen.sheet-open .sheet { transform: none; }
+  .sheet .grab { width: 36px; height: 4px; border-radius: 4px; background: #d1d7db; margin: 8px auto 2px; }
+  .sheet .top { display: flex; align-items: center; padding: 6px 16px 10px; font-weight: 600; font-size: 16px; }
+  .sheet .top .x { font-size: 20px; color: #54656f; width: 28px; cursor: pointer; }
+  .sheet .top .tt { flex: 1; text-align: center; margin-right: 28px; }
+  .sheet .rows { overflow-y: auto; padding: 0 0 6px; }
+  .sheet .opt { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; cursor: pointer;
+                border-bottom: 1px solid #f0f2f5; font-size: 15px; }
+  .sheet .opt .d { display: block; font-size: 12.5px; color: var(--wa-meta); margin-top: 2px; }
+  .sheet .opt .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #8696a0; flex: none; margin-left: 12px; }
+  .sheet .opt.sel .radio { border-color: var(--wa-accent); box-shadow: inset 0 0 0 4px #fff; background: var(--wa-accent); }
+  .sheet .foot { padding: 10px 16px 26px; text-align: center; font-size: 12px; color: var(--wa-meta); }
+
+  .label { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-size: 13px; color: var(--muted);
+           letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
+  .wrap { position: relative; padding-top: 30px; }
+  @media (max-width: 1100px) { .side { display: none; } .phone.small { display: none; } }
+</style>
+</head>
+<body>
+  <aside class="side">
+    <div class="brand">Portfolio demo · Booking bot</div>
+    <h1>Book a salon appointment in WhatsApp</h1>
+    <p class="sub">One Python core, two official channels: WhatsApp Cloud API and Viber Bot API. Reminders, reschedule, admin commands. DE · EN · RU.</p>
+    <ol class="steps" id="steps">
+      <li data-s="1"><b>1</b>AI disclosure (EU AI Act)</li>
+      <li data-s="2"><b>2</b>Service → master</li>
+      <li data-s="3"><b>3</b>Live free slots</li>
+      <li data-s="4"><b>4</b>Confirm booking</li>
+      <li data-s="5"><b>5</b>Reminder 24 h &amp; 2 h</li>
+      <li data-s="6"><b>6</b>Admin: day view, close slot</li>
+      <li data-s="7"><b>7</b>Reschedule or cancel</li>
+    </ol>
+    <div class="clock">
+      <div class="t"><span class="lbl">Demo clock (Europe/Berlin)</span><span id="clk">—</span></div>
+      <button id="jump" title="Move the clock to the next reminder">⏩ Next reminder</button>
+    </div>
+    <div class="chips">
+      <span class="chip">FastAPI webhooks</span><span class="chip">SQLite</span><span class="chip">WhatsApp Cloud API</span>
+      <span class="chip">Viber Bot API</span><span class="chip">53 pytest scenarios</span><span class="chip">Google Sheets export</span>
+    </div>
+  </aside>
+
+  <div class="wrap"><div class="label">Client · WhatsApp</div>
+    <div class="phone" id="p-client"></div></div>
+  <div class="wrap"><div class="label" style="top:56px">Salon owner · admin</div>
+    <div class="phone small" id="p-admin"></div></div>
+
+<template id="phone-tpl">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="status"><span class="time">9:41</span><span>●●● 5G ▮</span></div>
+    <div class="head">
+      <span class="back">‹</span>
+      <div class="avatar">SN</div>
+      <div class="who"><div class="name"><span class="nm">Studio Nord</span><span class="verified">✓</span></div>
+        <div class="st">business account</div></div>
+      <div class="icons"><span>⌕</span><span>⋮</span></div>
+    </div>
+    <div class="chat"><div class="day">Today</div></div>
+    <div class="bar">
+      <div class="input"><span>☺</span><input placeholder="Message" /><span>⌁</span></div>
+      <button class="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+    </div>
+    <div class="sheet-bg"></div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="top"><span class="x">✕</span><span class="tt">Choose</span></div>
+      <div class="rows"></div>
+      <div class="foot">Tap an option to send</div>
+    </div>
+  </div>
+</template>
+
+<script>
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let localClock = "";
+
+function hhmm() {
+  // phone time follows the demo clock ("Wed 18.11. 09:00")
+  const m = localClock.match(/(\d\d:\d\d)$/);
+  return m ? m[1] : new Date().toTimeString().slice(0, 5);
+}
+
+class Phone {
+  constructor(el, user, opts = {}) {
+    this.user = user;
+    el.appendChild(document.getElementById("phone-tpl").content.cloneNode(true));
+    this.screen = el.querySelector(".screen");
+    this.chat = el.querySelector(".chat");
+    this.input = el.querySelector("input");
+    this.st = el.querySelector(".st");
+    this.timeEl = el.querySelector(".time");
+    if (opts.title) el.querySelector(".nm").textContent = opts.title;
+    if (opts.status) this.st.textContent = opts.status;
+    this.defaultStatus = this.st.textContent;
+    this.lastSide = null;
+    el.querySelector(".send").onclick = () => this.sendText();
+    this.input.addEventListener("keydown", e => { if (e.key === "Enter") this.sendText(); });
+    el.querySelector(".sheet-bg").onclick = () => this.closeSheet();
+    el.querySelector(".x").onclick = () => this.closeSheet();
+  }
+  scroll() { this.chat.scrollTop = this.chat.scrollHeight; }
+  row(side) {
+    const r = document.createElement("div");
+    r.className = "row " + side;
+    const m = document.createElement("div");
+    m.className = "msg";
+    r.appendChild(m);
+    this.chat.appendChild(r);
+    const first = this.lastSide !== side;
+    this.lastSide = side;
+    return [m, first];
+  }
+  bubble(side, text, extra = {}) {
+    const [m, first] = this.row(side);
+    const b = document.createElement("div");
+    b.className = "bubble" + (first ? " first" : "") + (extra.list ? " list" : "");
+    if (extra.tpl) { const t = document.createElement("div"); t.className = "tpl"; t.textContent = "template · " + extra.tpl; b.appendChild(t); b.appendChild(document.createElement("br")); }
+    b.appendChild(document.createTextNode(text));
+    const meta = document.createElement("span");
+    meta.className = "meta";
+    meta.innerHTML = hhmm() + (side === "out" ? ' <span class="ticks">✓✓</span>' : "");
+    b.appendChild(meta);
+    m.appendChild(b);
+    this.scroll();
+    return [m, b];
+  }
+  system(text) { const d = document.createElement("div"); d.className = "sys"; d.textContent = text; this.chat.appendChild(d); this.lastSide = null; this.scroll(); }
+  render(p) {
+    if (p.type === "text") { this.bubble("in", p.text.body, { tpl: p._template }); return; }
+    const it = p.interactive;
+    if (it.type === "button") {
+      const [m] = this.bubble("in", it.body.text, { tpl: p._template });
+      const box = document.createElement("div"); box.className = "btns";
+      for (const b of it.action.buttons) {
+        const el = document.createElement("button");
+        el.className = "btn"; el.textContent = b.reply.title; el.dataset.id = b.reply.id;
+        el.onclick = () => { el.classList.add("pressed"); this.tap(b.reply.id, b.reply.title); };
+        box.appendChild(el);
+      }
+      m.appendChild(box); this.scroll();
+    } else if (it.type === "list") {
+      const [m, b] = this.bubble("in", it.body.text, { list: true, tpl: p._template });
+      const lb = document.createElement("div"); lb.className = "listbtn"; lb.textContent = "☰  " + it.action.button;
+      const rows = it.action.sections.flatMap(s => s.rows);
+      lb.onclick = () => this.openSheet(it.action.button, rows);
+      b.appendChild(lb); this.scroll();
+      this.lastList = { title: it.action.button, rows };
+    }
+  }
+  openSheet(title, rows) {
+    this.screen.querySelector(".tt").textContent = title;
+    const box = this.screen.querySelector(".rows"); box.innerHTML = "";
+    for (const r of rows) {
+      const o = document.createElement("div"); o.className = "opt"; o.dataset.id = r.id;
+      o.innerHTML = `<div><span class="tl"></span>${r.description ? '<span class="d"></span>' : ""}</div><span class="radio"></span>`;
+      o.querySelector(".tl").textContent = r.title;
+      if (r.description) o.querySelector(".d").textContent = r.description;
+      o.onclick = async () => { o.classList.add("sel"); await sleep(260); this.closeSheet(); this.tap(r.id, r.title); };
+      box.appendChild(o);
+    }
+    this.screen.classList.add("sheet-open");
+  }
+  closeSheet() { this.screen.classList.remove("sheet-open"); }
+  async typing(on) {
+    if (on) {
+      this.st.textContent = "typing…";
+      const [m] = this.row("in"); this.lastSide = null;
+      m.innerHTML = '<div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+      this.typingEl = m.parentElement; this.scroll();
+    } else {
+      this.st.textContent = this.defaultStatus;
+      if (this.typingEl) { this.typingEl.remove(); this.typingEl = null; this.lastSide = null; }
+    }
+  }
+  async post(body) {
+    await this.typing(true);
+    const t0 = performance.now();
+    const r = await fetch("/api/emu/send", { method: "POST", headers: { "content-type": "application/json" },
+                                             body: JSON.stringify({ user: this.user, ...body }) });
+    const data = await r.json();
+    const wait = 650 - (performance.now() - t0);
+    if (wait > 0) await sleep(wait);
+    await this.typing(false);
+    setClock(data.local);
+    for (const m of data.messages) { this.render(m); await sleep(380); }
+  }
+  sendText(text) {
+    text = (text ?? this.input.value).trim();
+    if (!text) return;
+    this.input.value = "";
+    this.bubble("out", text);
+    return this.post({ text });
+  }
+  tap(id, title) { this.bubble("out", title); return this.post({ payload: id }); }
+  async poll() {
+    const r = await fetch("/api/emu/poll?user=" + encodeURIComponent(this.user));
+    const data = await r.json();
+    setClock(data.local);
+    for (const m of data.messages) { this.render(m); await sleep(380); }
+  }
+}
+
+function setClock(s) {
+  if (!s) return;
+  localClock = s;
+  document.getElementById("clk").textContent = s;
+  for (const p of [client, admin]) p.timeEl.textContent = hhmm();
+}
+
+function setStep(n) {
+  document.querySelectorAll("#steps li").forEach(li => {
+    const s = +li.dataset.s;
+    li.classList.toggle("on", s === n);
+    li.classList.toggle("done", s < n);
+  });
+}
+
+const client = new Phone(document.getElementById("p-client"), "client");
+const admin = new Phone(document.getElementById("p-admin"), "admin", { title: "Studio Nord · Admin", status: "admin commands" });
+
+document.getElementById("jump").onclick = async () => {
+  const r = await fetch("/api/emu/clock", { method: "POST", headers: { "content-type": "application/json" },
+                                            body: JSON.stringify({ next_reminder: true }) });
+  const d = await r.json();
+  setClock(d.local);
+  client.system("⏩ Clock moved to " + d.local);
+  await client.poll();
+};
+
+setInterval(() => { client.poll(); admin.poll(); }, 4000);
+client.poll();
+window.demo = { client, admin, setStep, sleep };
+</script>
+</body>
+</html>
