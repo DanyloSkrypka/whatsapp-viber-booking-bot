@@ -4,13 +4,15 @@ An appointment booking bot for salons, barbershops and solo masters. **One Pytho
 
 ![Demo: client books a haircut in WhatsApp](docs/demo.gif)
 
-▶️ **Full demo video (55 s):**
+▶️ **Full demo video (about 50 s, 1080p 60 fps):**
 
 https://github.com/user-attachments/assets/ee093938-beb4-49d7-b479-a780f99c997c
 
-| Pick a service | Booked | Reminder + admin |
-|---|---|---|
-| ![](screenshot-1-services.png) | ![](screenshot-2-booked.png) | ![](screenshot-3-reminder-admin.png) |
+| Pick a service | Booked |
+|---|---|
+| ![Pick a service](docs/screenshots/screenshot-1-services.png) | ![Booked](docs/screenshots/screenshot-2-booked.png) |
+| **Reminder + admin** | **Summary** |
+| ![Reminder + admin](docs/screenshots/screenshot-3-reminder-admin.png) | ![Summary card](docs/screenshots/04-end-card.png) |
 
 ## What it does
 - **Flow:** service → master (skipped if only one master offers it) → free days → free slots → summary → confirm → booking number.
