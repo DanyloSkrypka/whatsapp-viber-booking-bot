@@ -6,7 +6,7 @@ An appointment booking bot for salons, barbershops and solo masters. **One Pytho
 
 ▶️ **Full demo video (about 50 s, 1080p 60 fps):**
 
-https://github.com/user-attachments/assets/ee093938-beb4-49d7-b479-a780f99c997c
+https://github.com/user-attachments/assets/683da9a9-98ff-4a38-939a-4c2cf68e75c3
 
 | Pick a service | Booked |
 |---|---|
