@@ -4,7 +4,9 @@ An appointment booking bot for salons, barbershops and solo masters. **One Pytho
 
 ![Demo: client books a haircut in WhatsApp](docs/demo.gif)
 
-▶️ **Full demo video (55 s):** [demo.mp4](demo.mp4)
+▶️ **Full demo video (55 s):**
+
+https://github.com/user-attachments/assets/ee093938-beb4-49d7-b479-a780f99c997c
 
 | Pick a service | Booked | Reminder + admin |
 |---|---|---|
